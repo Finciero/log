@@ -10,6 +10,12 @@ type Context struct {
 	kitlog.Context
 }
 
+// NewContext ...
+func NewContext() *Context {
+	logger := kitlog.NewJSONLogger(os.Stderr)
+	return &Context{*kitlog.NewContext(logger)}
+}
+
 // NewRequestContext ...
 func NewRequestContext(requestID string) *Context {
 	logger := kitlog.NewJSONLogger(os.Stderr)
