@@ -11,15 +11,21 @@ type Context struct {
 }
 
 // NewContext ...
-func NewContext() *Context {
+func NewContext(keyvalues ...interface{}) *Context {
 	logger := kitlog.NewJSONLogger(os.Stderr)
-	return &Context{*kitlog.NewContext(logger)}
+	return &Context{*kitlog.NewContext(logger).With(keyvalues...)}
 }
 
 // NewRequestContext ...
-func NewRequestContext(requestID string) *Context {
+func NewRequestContext(requestID string, keyvalues ...interface{}) *Context {
 	logger := kitlog.NewJSONLogger(os.Stderr)
-	return &Context{*kitlog.NewContext(logger).With("request_id", requestID)}
+	ctx := kitlog.NewContext(logger).With(keyvalues...)
+	return &Context{*ctx.With("request_id", requestID)}
+}
+
+// With returns a new Context with keyvals appended to those of the receiver.
+func (ctx *Context) With(keyvals ...interface{}) *Context {
+	return &Context{*ctx.Context.With(keyvals...)}
 }
 
 func (ctx *Context) Info(keyvals ...interface{}) {
