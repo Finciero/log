@@ -1,11 +1,15 @@
 package log
 
+// TODO(jaguirre): add documentation
+
 import (
 	"os"
 
+	"github.com/Finciero/errors"
 	kitlog "github.com/go-kit/kit/log"
 )
 
+// Context ...
 type Context struct {
 	kitlog.Context
 }
@@ -28,19 +32,38 @@ func (ctx *Context) With(keyvals ...interface{}) *Context {
 	return &Context{*ctx.Context.With(keyvals...)}
 }
 
+// Info ...
 func (ctx *Context) Info(keyvals ...interface{}) {
-	ctx.With("level", "info").Log(keyvals...)
+	ctx.Context.With("level", "info").Log(keyvals...)
 }
 
-func (ctx *Context) Error(keyvals ...interface{}) {
-	ctx.With("level", "error").Log(keyvals...)
+// Error ...
+func (ctx *Context) Error(err error, keyvals ...interface{}) {
+	var desc string
+
+	if val, ok := (err).(*errors.Error); ok {
+		for k, v := range val.Meta {
+			keyvals = append(keyvals, k, v)
+		}
+		desc = val.Description
+	} else {
+		desc = err.Error()
+	}
+
+	if len(desc) > 0 {
+		keyvals = append(keyvals, "desc", desc)
+	}
+
+	ctx.Context.With("level", "error").Log(keyvals...)
 }
 
+// Fatal ..
 func (ctx *Context) Fatal(keyvals ...interface{}) {
-	ctx.With("level", "fatal").Log(keyvals...)
+	ctx.Context.With("level", "fatal").Log(keyvals...)
 	os.Exit(1)
 }
 
+// Warn ...
 func (ctx *Context) Warn(keyvals ...interface{}) {
-	ctx.With("level", "warning").Log(keyvals...)
+	ctx.Context.With("level", "warning").Log(keyvals...)
 }
