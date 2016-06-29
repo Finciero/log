@@ -9,6 +9,14 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 )
 
+// Logger ...
+type Logger interface {
+	Log(keyvalues ...interface{})
+	Warn(keyvalues ...interface{})
+	Fatal(keyvalues ...interface{})
+	Error(keyvalues ...interface{})
+}
+
 // Context ...
 type Context struct {
 	kitlog.Context
