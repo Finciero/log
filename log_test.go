@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -64,6 +65,11 @@ func TestError(t *testing.T) {
 		out    string
 	}{
 		{
+			err:    nil,
+			params: nil,
+			out:    "",
+		},
+		{
 			err:    finciero_errors.New(finciero_errors.StatusNotFound, "finciero error"),
 			params: []interface{}{"foo", "bar"},
 			out:    `{"desc":"finciero error","foo":"bar","level":"error","request_id":"test-id"}`,
@@ -103,6 +109,9 @@ func TestError(t *testing.T) {
 		r := bufio.NewReader(reader)
 
 		out, _, err := r.ReadLine()
+		if tt.out == "" && err == io.EOF {
+			continue
+		}
 		ok(t, err)
 		equals(t, tt.out, string(out))
 	}

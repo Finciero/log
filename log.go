@@ -47,6 +47,10 @@ func (ctx *Context) Info(keyvals ...interface{}) {
 
 // Error ...
 func (ctx *Context) Error(err error, keyvals ...interface{}) {
+	if err == nil {
+		return
+	}
+
 	var desc string
 
 	if val, ok := (err).(*errors.Error); ok {
