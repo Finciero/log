@@ -11,10 +11,10 @@ import (
 
 // Logger ...
 type Logger interface {
-	Log(keyvalues ...interface{})
-	Warn(keyvalues ...interface{})
-	Fatal(keyvalues ...interface{})
-	Error(keyvalues ...interface{})
+	Log(keyvalues ...interface{}) error
+	Info(keyvalues ...interface{}) error
+	Warn(keyvalues ...interface{}) error
+	Error(err error, keyvalues ...interface{}) error
 }
 
 // Context ...
@@ -41,12 +41,12 @@ func (ctx *Context) With(keyvals ...interface{}) *Context {
 }
 
 // Info ...
-func (ctx *Context) Info(keyvals ...interface{}) {
-	ctx.Context.With("level", "info").Log(keyvals...)
+func (ctx *Context) Info(keyvals ...interface{}) error {
+	return ctx.Context.With("level", "info").Log(keyvals...)
 }
 
 // Error ...
-func (ctx *Context) Error(err error, keyvals ...interface{}) {
+func (ctx *Context) Error(err error, keyvals ...interface{}) error {
 	var desc string
 
 	if val, ok := (err).(*errors.Error); ok {
@@ -62,16 +62,10 @@ func (ctx *Context) Error(err error, keyvals ...interface{}) {
 		keyvals = append(keyvals, "desc", desc)
 	}
 
-	ctx.Context.With("level", "error").Log(keyvals...)
-}
-
-// Fatal ..
-func (ctx *Context) Fatal(keyvals ...interface{}) {
-	ctx.Context.With("level", "fatal").Log(keyvals...)
-	os.Exit(1)
+	return ctx.Context.With("level", "error").Log(keyvals...)
 }
 
 // Warn ...
-func (ctx *Context) Warn(keyvals ...interface{}) {
-	ctx.Context.With("level", "warning").Log(keyvals...)
+func (ctx *Context) Warn(keyvals ...interface{}) error {
+	return ctx.Context.With("level", "warning").Log(keyvals...)
 }
