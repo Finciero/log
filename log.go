@@ -15,6 +15,8 @@ type Logger interface {
 	Info(keyvalues ...interface{}) error
 	Warn(keyvalues ...interface{}) error
 	Error(err error, keyvalues ...interface{}) error
+
+	With(keyvalues ...interface{}) Logger
 }
 
 // Context ...
@@ -36,7 +38,7 @@ func NewRequestContext(requestID string, keyvalues ...interface{}) *Context {
 }
 
 // With returns a new Context with keyvals appended to those of the receiver.
-func (ctx *Context) With(keyvals ...interface{}) *Context {
+func (ctx *Context) With(keyvals ...interface{}) Logger {
 	return &Context{*ctx.Context.With(keyvals...)}
 }
 
