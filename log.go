@@ -60,8 +60,12 @@ func serializeStruct(val interface{}) map[string]interface{} {
 	tp := el.Type()
 
 	for i := 0; i < el.NumField(); i++ {
-		fv := el.Field(i)
 		sf := tp.Field(i)
+		fv := el.Field(i)
+
+		if sf.PkgPath != "" {
+			continue
+		}
 
 		key := strings.ToSnake(sf.Name)
 

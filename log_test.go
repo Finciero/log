@@ -171,6 +171,35 @@ func TestWarn(t *testing.T) {
 	}
 }
 
+func TestSerializeStruct(t *testing.T) {
+	type testStruct struct {
+		A int
+	}
+
+	tests := []struct {
+		val interface{}
+		exp map[string]interface{}
+	}{
+		{
+			val: struct{ A *testStruct }{A: &testStruct{3}},
+			exp: map[string]interface{}{"a": map[string]interface{}{"a": 3}},
+		},
+		{
+			val: struct{ A *testStruct }{A: nil},
+			exp: map[string]interface{}{"a": (*testStruct)(nil)},
+		},
+		{
+			val: struct{ a *testStruct }{a: &testStruct{3}},
+			exp: map[string]interface{}{},
+		},
+	}
+
+	for _, tt := range tests {
+		res := serializeStruct(tt.val)
+		equals(t, res, tt.exp)
+	}
+}
+
 // equals fails the test if exp is not equal to act.
 func equals(tb testing.TB, exp, act interface{}) {
 	if !reflect.DeepEqual(exp, act) {
