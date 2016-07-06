@@ -17,6 +17,7 @@ type Logger interface {
 	Info(keyvalues ...interface{}) error
 	Warn(keyvalues ...interface{}) error
 	Error(err error, keyvalues ...interface{}) error
+	Fatal(err error, keyvalues ...interface{}) error
 
 	With(keyvalues ...interface{}) Logger
 }
@@ -47,6 +48,61 @@ func (ctx *Context) With(keyvals ...interface{}) Logger {
 // Info ...
 func (ctx *Context) Info(keyvals ...interface{}) error {
 	return ctx.Context.With("level", "info").Log(keyvals...)
+}
+
+// Error ...
+func (ctx *Context) Error(err error, keyvals ...interface{}) error {
+	if err == nil {
+		return nil
+	}
+
+	if val, ok := (err).(*errors.Error); ok {
+		for k, v := range val.Meta {
+			keyvals = append(keyvals, k, v)
+		}
+
+		if val.InternalError != nil {
+			errMap := serializeStruct(val.InternalError)
+			keyvals = append(keyvals, "error", errMap)
+		}
+
+		return ctx.Context.With(
+			"level", "error",
+			"msg", val.Message,
+		).Log(keyvals...)
+	}
+
+	return ctx.Context.With("level", "error", "msg", err).Log(keyvals...)
+}
+
+// Fatal ...
+func (ctx *Context) Fatal(err error, keyvals ...interface{}) error {
+	if err == nil {
+		return nil
+	}
+
+	if val, ok := (err).(*errors.Error); ok {
+		for k, v := range val.Meta {
+			keyvals = append(keyvals, k, v)
+		}
+
+		if val.InternalError != nil {
+			errMap := serializeStruct(val.InternalError)
+			keyvals = append(keyvals, "error", errMap)
+		}
+
+		return ctx.Context.With(
+			"level", "error",
+			"msg", val.Message,
+		).Log(keyvals...)
+	}
+
+	return ctx.Context.With("level", "fatal", "msg", err).Log(keyvals...)
+}
+
+// Warn ...
+func (ctx *Context) Warn(keyvals ...interface{}) error {
+	return ctx.Context.With("level", "warning").Log(keyvals...)
 }
 
 func serializeStruct(val interface{}) map[string]interface{} {
@@ -85,34 +141,4 @@ func serializeStruct(val interface{}) map[string]interface{} {
 	}
 
 	return res
-}
-
-// Error ...
-func (ctx *Context) Error(err error, keyvals ...interface{}) error {
-	if err == nil {
-		return nil
-	}
-
-	if val, ok := (err).(*errors.Error); ok {
-		for k, v := range val.Meta {
-			keyvals = append(keyvals, k, v)
-		}
-
-		if val.InternalError != nil {
-			errMap := serializeStruct(val.InternalError)
-			keyvals = append(keyvals, "error", errMap)
-		}
-
-		return ctx.Context.With(
-			"level", "error",
-			"msg", val.Message,
-		).Log(keyvals...)
-	}
-
-	return ctx.Context.With("level", "error", "msg", err).Log(keyvals...)
-}
-
-// Warn ...
-func (ctx *Context) Warn(keyvals ...interface{}) error {
-	return ctx.Context.With("level", "warning").Log(keyvals...)
 }

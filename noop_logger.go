@@ -28,6 +28,11 @@ func (n *NOOPLogger) Error(_ error, _ ...interface{}) error {
 	return nil
 }
 
+// Fatal does nothing and returns nil
+func (n *NOOPLogger) Fatal(_ error, _ ...interface{}) error {
+	return nil
+}
+
 // Warn does nothing and returns nil
 func (n *NOOPLogger) Warn(_ ...interface{}) error {
 	return nil
